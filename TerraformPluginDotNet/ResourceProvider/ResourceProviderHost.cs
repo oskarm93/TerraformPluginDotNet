@@ -1,4 +1,6 @@
-﻿using TerraformPluginDotNet.Serialization;
+﻿using System.Reflection;
+using TerraformPluginDotNet.Resources;
+using TerraformPluginDotNet.Serialization;
 using Tfplugin5;
 
 namespace TerraformPluginDotNet.ResourceProvider;
@@ -51,10 +53,26 @@ class ResourceProviderHost<T>
         var planned = await _resourceProvider.PlanAsync(prior, proposed);
         var plannedSerialized = SerializeDynamicValue(planned);
 
-        return new PlanResourceChange.Types.Response
+        var response = new PlanResourceChange.Types.Response
         {
             PlannedState = plannedSerialized,
         };
+
+        var properties = planned.GetType().GetProperties();
+        foreach (var property in properties)
+        {
+            var forcesReplacement = property.GetCustomAttribute<ForcesReplacementAttribute>() != null;
+            if (forcesReplacement)
+            {
+                var key = property.GetCustomAttribute<MessagePack.KeyAttribute>();
+                var step = new AttributePath.Types.Step { AttributeName = key.StringKey };
+                var attributePath = new AttributePath();
+                attributePath.Steps.Add(step);
+                response.RequiresReplace.Add(attributePath);
+            }
+        }
+
+        return response;
     }
 
     public async Task<ApplyResourceChange.Types.Response> ApplyResourceChange(ApplyResourceChange.Types.Request request)
