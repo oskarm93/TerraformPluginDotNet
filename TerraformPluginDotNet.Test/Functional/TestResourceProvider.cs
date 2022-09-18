@@ -7,9 +7,9 @@ namespace TerraformPluginDotNet.Test.Functional;
 
 class TestResourceProvider : IResourceProvider<TestResource>
 {
-    public Task<TestResource> PlanAsync(TestResource prior, TestResource proposed)
+    public Task<PlanResult<TestResource>> PlanAsync(TestResource prior, TestResource proposed)
     {
-        return Task.FromResult(proposed);
+        return Task.FromResult(new PlanResult<TestResource> { Result = proposed });
     }
 
     public Task<TestResource> CreateAsync(TestResource planned)

@@ -7,9 +7,9 @@ namespace SchemaUpgrade;
 
 public class UpgradableResourceProvider : IResourceProvider<UpgradableResourceV2>
 {
-    public Task<UpgradableResourceV2> PlanAsync(UpgradableResourceV2 prior, UpgradableResourceV2 proposed)
+    public Task<PlanResult<UpgradableResourceV2>> PlanAsync(UpgradableResourceV2 prior, UpgradableResourceV2 proposed)
     {
-        return Task.FromResult(proposed);
+        return Task.FromResult(new PlanResult<UpgradableResourceV2> { Result = proposed });
     }
 
     public Task<UpgradableResourceV2> CreateAsync(UpgradableResourceV2 planned)

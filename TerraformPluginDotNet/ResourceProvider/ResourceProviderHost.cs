@@ -48,13 +48,23 @@ class ResourceProviderHost<T>
         var prior = DeserializeDynamicValue(request.PriorState);
         var proposed = DeserializeDynamicValue(request.ProposedNewState);
 
-        var planned = await _resourceProvider.PlanAsync(prior, proposed);
+        var planResult = await _resourceProvider.PlanAsync(prior, proposed);
+        var planned = planResult.Result;
         var plannedSerialized = SerializeDynamicValue(planned);
 
-        return new PlanResourceChange.Types.Response
+        var response = new PlanResourceChange.Types.Response
         {
             PlannedState = plannedSerialized,
         };
+
+        foreach (var attributeToReplace in planResult.RequiresReplace)
+        {
+            var step = new AttributePath.Types.Step { AttributeName = attributeToReplace };
+            var attributePath = new AttributePath();
+            attributePath.Steps.Add(step);
+            response.RequiresReplace.Add(attributePath);
+        }
+        return response;
     }
 
     public async Task<ApplyResourceChange.Types.Response> ApplyResourceChange(ApplyResourceChange.Types.Request request)

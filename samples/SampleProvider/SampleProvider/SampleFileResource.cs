@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using MessagePack;
 using TerraformPluginDotNet.Resources;
 using TerraformPluginDotNet.Serialization;
@@ -17,7 +18,8 @@ public class SampleFileResource
     [MessagePackFormatter(typeof(ComputedStringValueFormatter))]
     public string Id { get; set; }
 
-    [Key("path")]
+    [Key("full_path")]
+    [JsonPropertyName("full_path")]
     [Description("Path to the file.")]
     [Required]
     public string Path { get; set; }

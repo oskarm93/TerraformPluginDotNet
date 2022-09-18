@@ -16,9 +16,18 @@ public class SampleFileResourceProvider : IResourceProvider<SampleFileResource>
         _configurator = configurator;
     }
 
-    public Task<SampleFileResource> PlanAsync(SampleFileResource prior, SampleFileResource proposed)
+    public Task<PlanResult<SampleFileResource>> PlanAsync(SampleFileResource prior, SampleFileResource proposed)
     {
-        return Task.FromResult(proposed);
+        if (prior != null)
+        {
+            var toReplace = new List<string>();
+            if (prior.Path != proposed.Path)
+            {
+                toReplace.Add("path");
+            }
+            return Task.FromResult(new PlanResult<SampleFileResource> { Result = proposed, RequiresReplace = toReplace });
+        }
+        return Task.FromResult(new PlanResult<SampleFileResource> { Result = proposed });
     }
 
     public async Task<SampleFileResource> CreateAsync(SampleFileResource planned)
